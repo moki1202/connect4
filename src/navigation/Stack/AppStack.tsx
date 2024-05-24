@@ -5,7 +5,7 @@ import HomeScreen from '../../screens/Home/HomeScreen'
 import RouteNames from '../RouteNames'
 import LobbyScreen from '../../screens/Lobby/LobbyScreen'
 import ProfileScreen from '../../screens/Profile/ProfileScreen'
-import PreGameScreen from '../../screens/Game/PreGameScreen'
+import PreGameScreen from '../../screens/PreGameScreen/PreGameScreen'
 import GameScreen from '../../screens/Game/GameScreen'
 import WinnerScreen from '../../screens/Winner/WinnerScreen'
 

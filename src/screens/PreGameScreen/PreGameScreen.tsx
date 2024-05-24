@@ -15,16 +15,12 @@ const PreGameScreen: React.FC = () => {
   const navigation: any = useNavigation()
   const [player1Name, setPlayer1Name] = useState<string>('')
   const [player2Name, setPlayer2Name] = useState<string>('')
-  const [numColumns, setNumColumns] = useState<string>('')
-  const [numRows, setNumRows] = useState<string>('')
 
   const handle_start_game = () => {
-    if (player1Name && player2Name && numColumns && numRows) {
+    if (player1Name && player2Name) {
       navigation.navigate(RouteNames.Game, {
         player1Name,
         player2Name,
-        numColumns: parseInt(numColumns, 10),
-        numRows: parseInt(numRows, 10),
       })
     } else {
       alert('Please fill all the fields')
@@ -50,26 +46,6 @@ const PreGameScreen: React.FC = () => {
           placeholderTextColor='#888'
           value={player2Name}
           onChangeText={setPlayer2Name}
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder='Number of Columns'
-          placeholderTextColor='#888'
-          value={numColumns}
-          onChangeText={setNumColumns}
-          keyboardType='numeric'
-        />
-      </View>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder='Number of Rows'
-          placeholderTextColor='#888'
-          value={numRows}
-          onChangeText={setNumRows}
-          keyboardType='numeric'
         />
       </View>
       <Pressable style={styles.button} onPress={handle_start_game}>

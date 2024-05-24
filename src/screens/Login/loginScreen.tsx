@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -13,8 +13,10 @@ import { useForm, Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigation } from '@react-navigation/native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import RouteNames from '../../navigation/RouteNames'
+import { useAuthStore } from '../../store/zustand/AuthStore'
 
 const styles = StyleSheet.create({
   container: {
@@ -60,6 +62,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  buttonDisabled: {
+    width: '100%',
+    padding: 15,
+    marginTop: 10,
+    backgroundColor: '#9720CF',
+    borderRadius: 25,
+    alignItems: 'center',
+    opacity: 0.5,
+  },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -94,13 +105,31 @@ const schema = z.object({
 const LoginScreen: React.FC = () => {
   const [rememberPassword, setRememberPassword] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [authInfo, setAuthInfo] = useState<{
+    username: string | null
+    password: string | null
+  }>({
+    username: null,
+    password: null,
+  })
 
   const navigation: any = useNavigation()
+  const setIsAuthenticated = useAuthStore((state) => state.setIsAuthenticated)
+
+  const load_auth_info = async () => {
+    const username = await AsyncStorage.getItem('username')
+    const password = await AsyncStorage.getItem('password')
+    setAuthInfo({ username, password })
+  }
+
+  useEffect(() => {
+    load_auth_info()
+  }, [])
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     watch,
   } = useForm({
     resolver: zodResolver(schema),
@@ -112,10 +141,18 @@ const LoginScreen: React.FC = () => {
   }
 
   const on_submit = (data: any) => {
-    console.log('form submission successful', data)
+    if (
+      data.username === authInfo.username &&
+      data.password === authInfo.password
+    ) {
+      setIsAuthenticated(true)
+      navigation.navigate(RouteNames.Home)
+    } else {
+      alert('Incorrect username or password. Please try again!')
+    }
   }
 
-  const passwordValue = watch('password')
+  const password_value = watch('password')
 
   return (
     <View style={styles.container}>
@@ -175,7 +212,7 @@ const LoginScreen: React.FC = () => {
           />
         </Pressable>
       </View>
-      {errors.password && passwordValue !== '' && (
+      {errors.password && password_value !== '' && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.password.message?.toString()}
         </Text>
@@ -188,11 +225,15 @@ const LoginScreen: React.FC = () => {
         />
         <Text style={styles.checkboxLabel}>Remember Password</Text>
       </View>
-      <Pressable style={styles.button} onPress={handleSubmit(on_submit)}>
+      <Pressable
+        style={isValid ? styles.button : styles.buttonDisabled}
+        onPress={handleSubmit(on_submit)}
+        disabled={!isValid}
+      >
         <Text style={styles.buttonText}>LOGIN</Text>
       </Pressable>
       <Text style={styles.signUpText}>
-        Don't have an account?{' '}
+        Don't have an account?
         <Text
           style={styles.signUpLink}
           onPress={() => navigation.navigate(RouteNames.Signup)}

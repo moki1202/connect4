@@ -11,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native'
 
 import RouteNames from '../../navigation/RouteNames'
-import useInGameNameStore from '../../store/zustand/store'
+import useInGameNameStore from '../../store/zustand/IngameNameStore'
 
 const LobbyScreen: React.FC = () => {
   const navigation: any = useNavigation()

@@ -11,7 +11,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import useInGameNameStore from '../../store/zustand/store'
+import useInGameNameStore from '../../store/zustand/IngameNameStore'
 import { useAuthStore } from '../../store/zustand/AuthStore'
 
 const ProfileScreen: React.FC = () => {
@@ -52,6 +52,7 @@ const ProfileScreen: React.FC = () => {
 
   const handle_sign_out = () => {
     setIsAuthenticated(false)
+    setInGameName('Player1')
   }
 
   return (

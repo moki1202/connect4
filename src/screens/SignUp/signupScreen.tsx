@@ -121,7 +121,6 @@ const SignUpScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
 
   const navigation: any = useNavigation()
-  const setIsAuthenticated = useAuthStore((state) => state.setIsAuthenticated)
 
   const {
     control,
@@ -138,18 +137,18 @@ const SignUpScreen: React.FC = () => {
   }
 
   const on_submit = async (data: any) => {
-    console.log('Form submission successful', data)
     try {
       await AsyncStorage.setItem('username', data.username)
       await AsyncStorage.setItem('email', data.email)
-      setIsAuthenticated(true)
+      await AsyncStorage.setItem('password', data.password)
+      navigation.navigate(RouteNames.Login)
     } catch (error) {
       console.error('Failed to save the username to AsyncStorage', error)
     }
   }
 
-  const passwordValue = watch('password')
-  const confirmPasswordValue = watch('confirm_password')
+  const password_value = watch('password')
+  const confirm_password_value = watch('confirm_password')
 
   return (
     <View style={styles.container}>
@@ -231,7 +230,7 @@ const SignUpScreen: React.FC = () => {
           />
         </Pressable>
       </View>
-      {errors.password && passwordValue !== '' && (
+      {errors.password && password_value !== '' && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.password.message?.toString()}
         </Text>
@@ -261,13 +260,13 @@ const SignUpScreen: React.FC = () => {
           />
         </Pressable>
       </View>
-      {errors.confirm_password && confirmPasswordValue !== '' && (
+      {errors.confirm_password && confirm_password_value !== '' && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.confirm_password.message?.toString()}
         </Text>
       )}
-      {passwordValue !== confirmPasswordValue &&
-        confirmPasswordValue !== '' && (
+      {password_value !== confirm_password_value &&
+        confirm_password_value !== '' && (
           <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
             Passwords do not match
           </Text>
@@ -293,12 +292,13 @@ const SignUpScreen: React.FC = () => {
       )}
       <Pressable
         style={isValid ? styles.button : styles.buttonDisabled}
-        onPress={isValid ? handleSubmit(on_submit) : undefined}
+        onPress={handleSubmit(on_submit)}
+        disabled={!isValid}
       >
         <Text style={styles.buttonText}>SIGN UP</Text>
       </Pressable>
       <Text style={styles.signInText}>
-        Already have an account?{' '}
+        Already have an account?
         <Text
           style={styles.signInLink}
           onPress={() => navigation.navigate(RouteNames.Login)}

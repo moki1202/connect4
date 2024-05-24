@@ -1,5 +1,12 @@
 import React, { useState, useCallback } from 'react'
-import { View, StyleSheet, Pressable, Text, Dimensions } from 'react-native'
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  Dimensions,
+  Image,
+} from 'react-native'
 import Animated, {
   Easing,
   useSharedValue,
@@ -113,7 +120,7 @@ const GameScreen: React.FC = ({ route }: any) => {
           const winnerName = currentPlayer === 1 ? player1Name : player2Name
           const timeoutId = setTimeout(() => {
             navigation.navigate('Winner', { winner: winnerName })
-          }, 1000)
+          }, 500)
 
           return () => clearTimeout(timeoutId)
         }
@@ -150,20 +157,19 @@ const GameScreen: React.FC = ({ route }: any) => {
                   onPress={() => handle_press(columnIndex)}
                 >
                   <View style={styles.cell}>
-                    <Animated.View
-                      style={[
-                        styles.circle,
-                        {
-                          backgroundColor:
-                            cell === 1
-                              ? 'red'
-                              : cell === 2
-                              ? 'yellow'
-                              : 'transparent',
-                        },
-                        animatedStyle,
-                      ]}
-                    />
+                    <Animated.View style={animatedStyle}>
+                      <Image
+                        source={
+                          cell === 1
+                            ? require('../../assets/coins/red-coin.png')
+                            : cell === 2
+                            ? require('../../assets/coins/yellow-coin.png')
+                            : null
+                        }
+                        style={styles.coin}
+                        resizeMode='contain'
+                      />
+                    </Animated.View>
                   </View>
                 </Pressable>
               )
@@ -212,14 +218,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 2,
     borderRadius: CELL_SIZE / 2,
-    borderColor: '#444',
-    borderWidth: 2,
     backgroundColor: '#21252E',
   },
-  circle: {
-    width: CELL_SIZE * 0.8,
-    height: CELL_SIZE * 0.8,
-    borderRadius: CELL_SIZE * 0.4,
+  // circle: {
+  //   width: CELL_SIZE * 0.8,
+  //   height: CELL_SIZE * 0.8,
+  //   borderRadius: CELL_SIZE * 0.4,
+  // },
+  coin: {
+    width: CELL_SIZE,
+    height: CELL_SIZE,
+    borderRadius: CELL_SIZE * 0.5,
   },
 })
 
