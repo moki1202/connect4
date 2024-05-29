@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   TextInput,
   Pressable,
   ScrollView,
+  Alert,
 } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as ImagePicker from 'expo-image-picker'
 
 import useInGameNameStore from '../../store/zustand/IngameNameStore'
 import { useAuthStore } from '../../store/zustand/AuthStore'
@@ -19,13 +21,16 @@ const ProfileScreen: React.FC = () => {
   const [userData, setUserData] = useState<{
     username: string | null
     email: string | null
+    profileImage: string | null
   }>({
     username: null,
     email: null,
+    profileImage: null,
   })
 
   const { inGameName, setInGameName, loadInGameName } = useInGameNameStore()
   const setIsAuthenticated = useAuthStore((state) => state.setIsAuthenticated)
+  const nameInputRef = useRef<TextInput>(null)
 
   useEffect(() => {
     loadInGameName()
@@ -35,19 +40,43 @@ const ProfileScreen: React.FC = () => {
   const get_user_data = async () => {
     const username = await AsyncStorage.getItem('username')
     const email = await AsyncStorage.getItem('email')
-    setUserData({ username, email })
+    const profileImage = await AsyncStorage.getItem('profileImage')
+    setUserData({ username, email, profileImage })
   }
 
   const handle_edit_name = () => {
     setEditingName(true)
+    setTimeout(() => {
+      if (nameInputRef.current) {
+        nameInputRef.current.focus()
+      }
+    }, 100)
   }
 
   const handle_save_name = () => {
     setEditingName(false)
   }
 
-  const handle_profile_picture_change = () => {
-    console.log('Change profile picture')
+  const handle_profile_picture_change = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission to access camera roll is required!')
+      return
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    })
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri
+      setUserData((prevData) => ({ ...prevData, profileImage: uri }))
+      await AsyncStorage.setItem('profileImage', uri)
+    }
   }
 
   const handle_sign_out = () => {
@@ -62,16 +91,24 @@ const ProfileScreen: React.FC = () => {
           onPress={handle_profile_picture_change}
           style={styles.profileImageContainer}
         >
-          <Image
-            source={require('../../assets/try-hard.jpg')}
-            style={styles.profileImage}
-          />
+          {userData.profileImage ? (
+            <Image
+              source={{ uri: userData.profileImage }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <Image
+              source={require('../../assets/try-hard.jpg')}
+              style={styles.profileImage}
+            />
+          )}
           <View style={styles.editIconContainer}>
             <MaterialCommunityIcons name='camera' size={20} color='white' />
           </View>
         </Pressable>
         {editingName ? (
           <TextInput
+            ref={nameInputRef}
             style={styles.nameInput}
             value={inGameName}
             onChangeText={setInGameName}

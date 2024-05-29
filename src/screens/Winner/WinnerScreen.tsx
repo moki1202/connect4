@@ -1,11 +1,38 @@
-import React from 'react'
-import { View, Text, StyleSheet, Dimensions } from 'react-native'
+import React, { useEffect } from 'react'
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Pressable,
+  BackHandler,
+} from 'react-native'
 import LottieView from 'lottie-react-native'
+import { useNavigation } from '@react-navigation/native'
+import RouteNames from '../../navigation/RouteNames'
 
 const { width, height } = Dimensions.get('window')
 
 const WinnerScreen: React.FC = ({ route }: any) => {
   const { winner } = route.params
+  const navigation: any = useNavigation()
+
+  const handleGoToHome = () => {
+    navigation.navigate(RouteNames.Lobby)
+  }
+
+  useEffect(() => {
+    const backAction = () => {
+      return true
+    }
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    )
+
+    return () => backHandler.remove()
+  }, [])
 
   return (
     <View style={styles.container}>
@@ -19,6 +46,9 @@ const WinnerScreen: React.FC = ({ route }: any) => {
         <Text style={styles.title}>{winner} Wins!</Text>
         <Text style={styles.subTitle}>Congratulations!</Text>
       </View>
+      <Pressable style={styles.button} onPress={handleGoToHome}>
+        <Text style={styles.buttonText}>Go to Home</Text>
+      </Pressable>
     </View>
   )
 }
@@ -52,6 +82,20 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: 'white',
     textAlign: 'center',
+    marginBottom: 30,
+  },
+  button: {
+    position: 'absolute',
+    bottom: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#9720CF',
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 })
 

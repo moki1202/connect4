@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "gameApp",
-    "slug": "gameApp",
+    "name": "Connect 4",
+    "slug": "connect 4",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -10,16 +10,23 @@
       "backgroundColor": "#ffffff"
     },
     "backgroundColor": "#181A20",
+    "icon": "./src/assets/game-icon.png",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./src/assets/game-icon.png",
+      "bundleIdentifier": "com.moki1202.connect4"
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./src/assets/game-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.moki1202.connect4"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "extra": {
+      "eas": {
+        "projectId": "4c655932-2e76-43d1-b5da-82f8a844ef56"
+      }
     }
   }
 }

@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  Modal,
-  ScrollView,
-} from 'react-native'
+import { View, Text, StyleSheet, Image, Pressable, Modal } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import RouteNames from '../../navigation/RouteNames'
 import useInGameNameStore from '../../store/zustand/IngameNameStore'
@@ -16,12 +9,19 @@ import useInGameNameStore from '../../store/zustand/IngameNameStore'
 const LobbyScreen: React.FC = () => {
   const navigation: any = useNavigation()
   const [modalVisible, setModalVisible] = useState(false)
+  const [profileImage, setProfileImage] = useState<string | null>(null)
 
   const { inGameName, loadInGameName } = useInGameNameStore()
 
   useEffect(() => {
     loadInGameName()
+    getProfileImage()
   }, [loadInGameName])
+
+  const getProfileImage = async () => {
+    const image = await AsyncStorage.getItem('profileImage')
+    setProfileImage(image)
+  }
 
   const handle_play_press = () => {
     navigation.navigate(RouteNames.PreGame)
@@ -43,7 +43,11 @@ const LobbyScreen: React.FC = () => {
     <View style={styles.container}>
       <Pressable onPress={handle_profile_press} style={styles.profileContainer}>
         <Image
-          source={require('../../assets/try-hard.jpg')}
+          source={
+            profileImage
+              ? { uri: profileImage }
+              : require('../../assets/try-hard.jpg')
+          }
           style={styles.profileImage}
         />
         <Text style={styles.inGameName}>{inGameName}</Text>
@@ -66,50 +70,45 @@ const LobbyScreen: React.FC = () => {
 
       <Modal
         transparent={true}
-        animationType='slide'
+        animationType='fade'
         visible={modalVisible}
         onRequestClose={handle_close_modal}
       >
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
-            <ScrollView contentContainerStyle={styles.scrollViewContent}>
-              <View style={styles.modalTitleContainer}>
-                <Text style={styles.modalTitle}>Game Rules</Text>
-              </View>
-              <View style={styles.ruleContainer}>
-                <Text style={styles.bulletPoint}>{'\u2022'}</Text>
-                <Text style={styles.modalText}>
-                  Connect 4 is a two-player game where players take turns
-                  dropping colored discs into a grid.
-                </Text>
-              </View>
-              <View style={styles.ruleContainer}>
-                <Text style={styles.bulletPoint}>{'\u2022'}</Text>
-                <Text style={styles.modalText}>
-                  The goal is to connect four discs in a row vertically,
-                  horizontally, or diagonally.
-                </Text>
-              </View>
-              <View style={styles.ruleContainer}>
-                <Text style={styles.bulletPoint}>{'\u2022'}</Text>
-                <Text style={styles.modalText}>
-                  The first player to connect four discs wins the game.
-                </Text>
-              </View>
-              <View style={styles.ruleContainer}>
-                <Text style={styles.bulletPoint}>{'\u2022'}</Text>
-                <Text style={styles.modalText}>
-                  If the grid is completely filled and no player has connected
-                  four discs, the game is a draw.
-                </Text>
-              </View>
-              <Pressable
-                style={styles.closeButton}
-                onPress={handle_close_modal}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </Pressable>
-            </ScrollView>
+            <View style={styles.modalTitleContainer}>
+              <Text style={styles.modalTitle}>Game Rules</Text>
+            </View>
+            <View style={styles.ruleContainer}>
+              <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+              <Text style={styles.modalText}>
+                Connect 4 is a two-player game where players take turns dropping
+                colored discs into a grid.
+              </Text>
+            </View>
+            <View style={styles.ruleContainer}>
+              <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+              <Text style={styles.modalText}>
+                The goal is to connect four discs in a row vertically,
+                horizontally, or diagonally.
+              </Text>
+            </View>
+            <View style={styles.ruleContainer}>
+              <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+              <Text style={styles.modalText}>
+                The first player to connect four discs wins the game.
+              </Text>
+            </View>
+            <View style={styles.ruleContainer}>
+              <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+              <Text style={styles.modalText}>
+                If the grid is completely filled and no player has connected
+                four discs, the game is a draw.
+              </Text>
+            </View>
+            <Pressable style={styles.closeButton} onPress={handle_close_modal}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -193,8 +192,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 15,
     maxHeight: '50%',
+    padding: 5,
   },
   scrollViewContent: {
     alignItems: 'flex-start',
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   bulletPoint: {
     fontSize: 24,
     lineHeight: 26,
-    marginRight: 5,
+    marginLeft: 5,
     width: 20,
     color: 'gold',
   },

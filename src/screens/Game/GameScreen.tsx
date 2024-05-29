@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   Text,
   Dimensions,
   Image,
+  BackHandler,
 } from 'react-native'
 import Animated, {
   Easing,
@@ -15,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import _ from 'lodash'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
+import RouteNames from '../../navigation/RouteNames'
 
 const ROWS = 6
 const COLUMNS = 7
@@ -41,6 +43,20 @@ const GameScreen: React.FC = ({ route }: any) => {
       setCurrentPlayer(1)
     }, [])
   )
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate(RouteNames.Lobby)
+      return true
+    }
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    )
+
+    return () => backHandler.remove()
+  }, [navigation])
 
   const check_winner = (grid: number[][], player: number): boolean => {
     // this checks for horizontal
@@ -220,11 +236,6 @@ const styles = StyleSheet.create({
     borderRadius: CELL_SIZE / 2,
     backgroundColor: '#21252E',
   },
-  // circle: {
-  //   width: CELL_SIZE * 0.8,
-  //   height: CELL_SIZE * 0.8,
-  //   borderRadius: CELL_SIZE * 0.4,
-  // },
   coin: {
     width: CELL_SIZE,
     height: CELL_SIZE,

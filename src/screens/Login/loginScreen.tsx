@@ -62,15 +62,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  buttonDisabled: {
-    width: '100%',
-    padding: 15,
-    marginTop: 10,
-    backgroundColor: '#9720CF',
-    borderRadius: 25,
-    alignItems: 'center',
-    opacity: 0.5,
-  },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -112,35 +103,36 @@ const LoginScreen: React.FC = () => {
     username: null,
     password: null,
   })
+  const [showErrors, setShowErrors] = useState(false)
 
   const navigation: any = useNavigation()
   const setIsAuthenticated = useAuthStore((state) => state.setIsAuthenticated)
 
-  const load_auth_info = async () => {
+  const loadAuthInfo = async () => {
     const username = await AsyncStorage.getItem('username')
     const password = await AsyncStorage.getItem('password')
     setAuthInfo({ username, password })
   }
 
   useEffect(() => {
-    load_auth_info()
+    loadAuthInfo()
   }, [])
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
-    watch,
+    formState: { errors },
+    trigger,
   } = useForm({
     resolver: zodResolver(schema),
     mode: 'onChange',
   })
 
-  const toggle_password_visibility = () => {
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
   }
 
-  const on_submit = (data: any) => {
+  const onSubmit = (data: any) => {
     if (
       data.username === authInfo.username &&
       data.password === authInfo.password
@@ -152,7 +144,13 @@ const LoginScreen: React.FC = () => {
     }
   }
 
-  const password_value = watch('password')
+  const handleLoginPress = async () => {
+    const isValid = await trigger() // Trigger validation on all fields
+    setShowErrors(true) // Set showErrors to true to display errors
+    if (isValid) {
+      handleSubmit(onSubmit)()
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -182,7 +180,7 @@ const LoginScreen: React.FC = () => {
           )}
         />
       </View>
-      {errors.username && (
+      {showErrors && errors.username && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.username.message?.toString()}
         </Text>
@@ -204,7 +202,7 @@ const LoginScreen: React.FC = () => {
             />
           )}
         />
-        <Pressable onPress={toggle_password_visibility}>
+        <Pressable onPress={togglePasswordVisibility}>
           <MaterialCommunityIcons
             name={showPassword ? 'eye-off-outline' : 'eye-outline'}
             size={24}
@@ -212,7 +210,7 @@ const LoginScreen: React.FC = () => {
           />
         </Pressable>
       </View>
-      {errors.password && password_value !== '' && (
+      {showErrors && errors.password && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.password.message?.toString()}
         </Text>
@@ -225,11 +223,7 @@ const LoginScreen: React.FC = () => {
         />
         <Text style={styles.checkboxLabel}>Remember Password</Text>
       </View>
-      <Pressable
-        style={isValid ? styles.button : styles.buttonDisabled}
-        onPress={handleSubmit(on_submit)}
-        disabled={!isValid}
-      >
+      <Pressable style={styles.button} onPress={handleLoginPress}>
         <Text style={styles.buttonText}>LOGIN</Text>
       </Pressable>
       <Text style={styles.signUpText}>

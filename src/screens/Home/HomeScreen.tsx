@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Pressable,
   ImageSourcePropType,
 } from 'react-native'
+import Swiper from 'react-native-swiper'
 import { useNavigation } from '@react-navigation/native'
 
 import BoardComponent from './BoardComponent'
@@ -31,48 +32,42 @@ const data = [
 
 const HomeScreen: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [currentImage, setCurrentImage] = useState<ImageSourcePropType | null>(
-    null
-  )
+  const swiperRef = useRef<Swiper>(null)
 
   const navigation: any = useNavigation()
 
-  useEffect(() => {
-    setCurrentImage(data[currentIndex].imageUri)
-  }, [currentIndex])
-
-  const handle_next = () => {
-    if (currentIndex === data.length - 1) {
-      navigation.navigate(RouteNames.Lobby)
-    } else {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % data.length)
-    }
+  const handleIndexChange = (index: number) => {
+    setCurrentIndex(index)
   }
 
-  const { title, subTitle } = data[currentIndex]
+  const handleNext = () => {
+    navigation.navigate(RouteNames.Lobby)
+  }
 
   return (
     <View style={styles.container}>
-      {currentImage && (
-        <BoardComponent
-          imageSource={currentImage}
-          title={title}
-          subTitle={subTitle}
-        />
-      )}
-      <View style={styles.footer}>
-        <View style={styles.pagination}>
-          {data.map((_, index) => (
-            <View
-              key={index}
-              style={[styles.dot, currentIndex === index && styles.activeDot]}
+      <Swiper
+        ref={swiperRef}
+        loop={false}
+        onIndexChanged={handleIndexChange}
+        index={currentIndex}
+        dot={<View style={styles.dot} />}
+        activeDot={<View style={styles.activeDot} />}
+        paginationStyle={{ bottom: 70 }}
+      >
+        {data.map((item, index) => (
+          <View key={index} style={styles.slide}>
+            <BoardComponent
+              imageSource={item.imageUri}
+              title={item.title}
+              subTitle={item.subTitle}
             />
-          ))}
-        </View>
-        <Pressable style={styles.button} onPress={handle_next}>
-          <Text style={styles.buttonText}>
-            {currentIndex == 2 ? 'Start' : 'Next'}
-          </Text>
+          </View>
+        ))}
+      </Swiper>
+      <View style={styles.footer}>
+        <Pressable style={styles.button} onPress={handleNext}>
+          <Text style={styles.buttonText}>Start</Text>
         </Pressable>
       </View>
     </View>
@@ -83,18 +78,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  slide: {
+    flex: 1,
+    alignItems: 'center',
   },
   footer: {
     width: '100%',
     alignItems: 'center',
-  },
-  pagination: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 25,
   },
   dot: {
     width: 10,
@@ -104,7 +96,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   activeDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#fff',
+    marginHorizontal: 5,
   },
   button: {
     flexDirection: 'row',

@@ -62,15 +62,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  buttonDisabled: {
-    width: '100%',
-    padding: 15,
-    marginTop: 10,
-    backgroundColor: '#9720CF',
-    borderRadius: 25,
-    alignItems: 'center',
-    opacity: 0.5,
-  },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -119,13 +110,15 @@ const schema = z
 
 const SignUpScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [showErrors, setShowErrors] = useState(false)
 
   const navigation: any = useNavigation()
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
+    trigger,
     watch,
   } = useForm({
     resolver: zodResolver(schema),
@@ -144,6 +137,14 @@ const SignUpScreen: React.FC = () => {
       navigation.navigate(RouteNames.Login)
     } catch (error) {
       console.error('Failed to save the username to AsyncStorage', error)
+    }
+  }
+
+  const handleSignUpPress = async () => {
+    const isValid = await trigger() // Trigger validation on all fields
+    setShowErrors(true) // Set showErrors to true to display errors
+    if (isValid) {
+      handleSubmit(on_submit)()
     }
   }
 
@@ -178,7 +179,7 @@ const SignUpScreen: React.FC = () => {
           )}
         />
       </View>
-      {errors.username && (
+      {showErrors && errors.username && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.username.message?.toString()}
         </Text>
@@ -200,7 +201,7 @@ const SignUpScreen: React.FC = () => {
           )}
         />
       </View>
-      {errors.email && (
+      {showErrors && errors.email && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.email.message?.toString()}
         </Text>
@@ -230,7 +231,7 @@ const SignUpScreen: React.FC = () => {
           />
         </Pressable>
       </View>
-      {errors.password && password_value !== '' && (
+      {showErrors && errors.password && password_value !== '' && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.password.message?.toString()}
         </Text>
@@ -260,12 +261,15 @@ const SignUpScreen: React.FC = () => {
           />
         </Pressable>
       </View>
-      {errors.confirm_password && confirm_password_value !== '' && (
-        <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
-          {errors.confirm_password.message?.toString()}
-        </Text>
-      )}
-      {password_value !== confirm_password_value &&
+      {showErrors &&
+        errors.confirm_password &&
+        confirm_password_value !== '' && (
+          <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
+            {errors.confirm_password.message?.toString()}
+          </Text>
+        )}
+      {showErrors &&
+        password_value !== confirm_password_value &&
         confirm_password_value !== '' && (
           <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
             Passwords do not match
@@ -285,16 +289,12 @@ const SignUpScreen: React.FC = () => {
         />
         <Text style={styles.checkboxLabel}>Accept Terms & Conditions</Text>
       </View>
-      {errors.termsAccepted && (
+      {showErrors && errors.termsAccepted && (
         <Text style={{ color: 'red', alignSelf: 'flex-start' }}>
           {errors.termsAccepted.message?.toString()}
         </Text>
       )}
-      <Pressable
-        style={isValid ? styles.button : styles.buttonDisabled}
-        onPress={handleSubmit(on_submit)}
-        disabled={!isValid}
-      >
+      <Pressable style={styles.button} onPress={handleSignUpPress}>
         <Text style={styles.buttonText}>SIGN UP</Text>
       </Pressable>
       <Text style={styles.signInText}>

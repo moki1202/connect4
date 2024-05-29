@@ -14,7 +14,7 @@ export default function App() {
     <>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={styles.container}>
-          <StatusBar style='auto' />
+          <StatusBar style='dark' />
           <NavigationContainer>
             {isAuthenticated ? <AppStack /> : <AuthNavigator />}
           </NavigationContainer>
